@@ -1,6 +1,6 @@
 import csv
 from mininet.net import Mininet
-from mininet.node import Controller
+from mininet.node import OVSSwitch
 from mininet.link import TCLink
 from mininet.cli import CLI
 from mininet.log import setLogLevel
@@ -15,21 +15,20 @@ PROTOCOLS = ["ipv4", "ipv6"]  # IPv4 e IPv6
 
 # Função para criar a topologia
 def create_topology():
-    net = Mininet(link=TCLink)
+    net = Mininet(switch=OVSSwitch, link=TCLink)
 
     # Adiciona hosts
     h1 = net.addHost('h1')
     h2 = net.addHost('h2')
 
     # Adiciona switches
-    s1 = net.addSwitch('s1')
-    s2 = net.addSwitch('s2')
+    s1 = net.addSwitch('s1', failMode='standalone')
+    s2 = net.addSwitch('s2', failMode='standalone')
 
     # Adiciona links com parâmetros (bw em Mbps, delay em ms, loss em %)
-    # Vamos reduzir a perda de pacotes para 1% para testar a conectividade
-    net.addLink(h1, s1, bw=10, delay='10ms', loss=0)  # Largura de banda de 100 Mbps, atraso de 50ms, perda de 1%
-    net.addLink(h2, s2, bw=10, delay='10ms', loss=0)
-    net.addLink(s1, s2, bw=10, delay='10ms', loss=0)
+    net.addLink(h1, s1, bw=10, delay='10ms', loss=5)  # Largura de banda de 100 Mbps, atraso de 50ms, perda de 1%
+    net.addLink(h2, s2, bw=10, delay='10ms', loss=5)
+    net.addLink(s1, s2, bw=10, delay='10ms', loss=5)
 
     net.start()
     return net, h1, h2
@@ -52,7 +51,7 @@ def run_iperf(h1, h2, protocol, version):
 
         # Executar cliente iperf em h1 e coletar resultados
         result = h1.cmd(f'iperf -c {h2.IP()} -t 10 -i 1')  # Testes de Throughput ajustados para 10 segundos
-        print("Resultados iperf:", result)  # Verificar saída do iperf
+        print("Resultados iperf (IPv4):", result)  # Verificar saída do iperf
         h2.cmd('kill %iperf')
 
     elif protocol == "ipv6":
@@ -60,12 +59,9 @@ def run_iperf(h1, h2, protocol, version):
         h2.cmd('iperf -s -V &')
         time.sleep(2)
 
-        # Obter o endereço IPv6 da interface h2-eth0
-        ipv6_address = h2.cmd("ip -6 addr show h2-eth0 | grep 'inet6' | awk '{print $2}' | cut -d/ -f1").strip()
-
-        # Executar cliente iperf em h1 para IPv6
-        result = h1.cmd(f'iperf -c {ipv6_address} -V -t 10 -i 1')  # Testes de Throughput ajustados para 10 segundos
-        print("Resultados iperf (IPv6):", result)  # Verificar saída do iperf
+        # Utilizar o endereço IPv6 configurado manualmente
+        result = h1.cmd(f'iperf -c 2001:db8::2 -V -t 10 -i 1')
+        print("Resultados iperf (IPv6):", result)
         h2.cmd('kill %iperf')
 
     # Extrair throughput do resultado
@@ -76,13 +72,12 @@ def run_iperf(h1, h2, protocol, version):
 def run_ping(h1, h2, protocol):
     print(f"Executando ping para {protocol}...")
     if protocol == "ipv4":
-        result = h1.cmd(f'ping -c 3 h2')
+        result = h1.cmd(f'ping -c 10 {h2.IP()}')
     elif protocol == "ipv6":
-        # Obter o endereço IPv6 da interface h2-eth0
-        ipv6_address = h2.cmd("ip -6 addr show h2-eth0 | grep 'inet6' | awk '{print $2}' | cut -d/ -f1").strip()
-        result = h1.cmd(f'ping6 -c 3 {ipv6_address}')
+        # Executar ping6 diretamente para o endereço configurado
+        result = h1.cmd(f'ping6 -c 10 2001:db8::2')
 
-    print("Resultados ping:", result)  # Verificar saída do ping
+    print("Resultados ping:", result)
     # Extrair latência média, perda de pacotes
     rtt, packet_loss = parse_ping(result)
     recovery_time = get_recovery_time(h1, h2)  # Calcular o tempo de recuperação

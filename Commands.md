@@ -1,5 +1,8 @@
 [ Commands ]
 
+  sudo apt update && sudo apt install mininet openvswitch-switch iperf iperf3 python3-psutil -y
+  sudo apt install python3-pip
+
   - Verificar qual versão atual do TCP -
     sysctl net.ipv4.tcp_congestion_control
 
@@ -8,7 +11,7 @@
 
   - Alterar versão do TCP -
     sudo sysctl -w net.ipv4.tcp_congestion_control=<version>
-      # version = reno | cubic | vegas | bbr | westwood | veno
+      # version = reno | cubic | bbr | vegas | veno | westwood
 
   - Verificar se o IPv6 está habilitado -
     sysctl net.ipv6.conf.all.disable_ipv6

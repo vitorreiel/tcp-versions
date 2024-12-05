@@ -29,11 +29,11 @@ def create_topology():
     h2 = net.addHost("h2", ip="10.0.2.2/24", defaultRoute="via 10.0.2.1")
 
     # Link hosts to routers
-    net.addLink(h1, r1, bw=100000, loss=0, delay='0ms') # 20Gbps/1%/10ms
-    net.addLink(h2, r2, bw=100000, loss=0, delay='0ms') # 20Gbps/1%/10ms
+    net.addLink(h1, r1, loss=0, delay='0ms') # 20Gbps/1%/10ms
+    net.addLink(h2, r2, loss=0, delay='0ms') # 20Gbps/1%/10ms
 
     # Link routers
-    net.addLink(r1, r2, bw=100000, loss=5, delay='10ms', intfName1="r1-eth1", intfName2="r2-eth1") # 20Gbps/1%/10ms
+    net.addLink(r1, r2, loss=0, delay='10ms', intfName1="r1-eth1", intfName2="r2-eth1") # 20Gbps/1%/10ms
 
     r1.setIP("192.168.1.1/30", intf="r1-eth1")
     r2.setIP("192.168.1.2/30", intf="r2-eth1")
@@ -220,7 +220,7 @@ if __name__ == '__main__':
 
     # Loop through TCP versions and IP versions, run 3 times for each configuration
     tcp_versions = ['reno', 'cubic', 'bbr', 'vegas', 'veno', 'westwood']
-    ip_versions = ['IPv4', 'IPv6']
+    ip_versions = ['IPv6', 'IPv6']
 
     for tcp_version in tcp_versions:
         for ip_version in ip_versions:

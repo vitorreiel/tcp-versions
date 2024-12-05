@@ -6,3 +6,5 @@ cd ../scenario-II
 sudo python3 script.py
 cd ../scenario-III
 sudo python3 script.py
+cd ../scenario-IV
+sudo python3 script.py

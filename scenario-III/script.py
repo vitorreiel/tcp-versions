@@ -29,11 +29,11 @@ def create_topology():
     h2 = net.addHost("h2", ip="10.0.2.2/24", defaultRoute="via 10.0.2.1")
 
     # Link hosts to routers
-    net.addLink(h1, r1, bw=100000, loss=0, delay='0ms') # 20Gbps/1%/10ms
-    net.addLink(h2, r2, bw=100000, loss=0, delay='0ms') # 20Gbps/1%/10ms
+    net.addLink(h1, r1, bw=100000, loss=0, delay='0ms') # 100Gbps/0%/50ms
+    net.addLink(h2, r2, bw=100000, loss=0, delay='0ms') # 100Gbps/0%/50ms
 
     # Link routers
-    net.addLink(r1, r2, bw=100000, loss=5, delay='100ms', intfName1="r1-eth1", intfName2="r2-eth1") # 20Gbps/1%/10ms
+    net.addLink(r1, r2, bw=100000, loss=1, delay='50ms', intfName1="r1-eth1", intfName2="r2-eth1") # 100Gbps/1%/50ms
 
     r1.setIP("192.168.1.1/30", intf="r1-eth1")
     r2.setIP("192.168.1.2/30", intf="r2-eth1")
@@ -229,7 +229,7 @@ if __name__ == '__main__':
                 net, h1, h2 = create_topology()
                 try:
                     # Measure metrics
-                    measure_metrics(net, h1, h2, f"scenario-III/dataset_{ip_version.lower()}_{tcp_version.lower()}.csv", output_log, test_id, tcp_version, ip_version)
+                    measure_metrics(net, h1, h2, f"dataset_{ip_version.lower()}_{tcp_version.lower()}.csv", output_log, test_id, tcp_version, ip_version)
                 finally:
                     # Clean up
                     cleanup(net)

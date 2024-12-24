@@ -29,11 +29,11 @@ def create_topology():
     h2 = net.addHost("h2", ip="10.0.2.2/24", defaultRoute="via 10.0.2.1")
 
     # Link hosts to routers
-    net.addLink(h1, r1, loss=0, delay='0ms') # 100Gbps/0%/10ms
-    net.addLink(h2, r2, loss=0, delay='0ms') # 100Gbps/0%/10ms
+    net.addLink(h1, r1, bw=100000, loss=0, delay='0ms') # 100Gbps/0%/10ms
+    net.addLink(h2, r2, bw=100000, loss=0, delay='0ms') # 100Gbps/0%/10ms
 
     # Link routers
-    net.addLink(r1, r2, loss=1, delay='10ms', intfName1="r1-eth1", intfName2="r2-eth1") # 100Gbps/1%/10ms
+    net.addLink(r1, r2, bw=100000, loss=1, delay='10ms', intfName1="r1-eth1", intfName2="r2-eth1") # 100Gbps/1%/10ms
 
     r1.setIP("192.168.1.1/30", intf="r1-eth1")
     r2.setIP("192.168.1.2/30", intf="r2-eth1")
